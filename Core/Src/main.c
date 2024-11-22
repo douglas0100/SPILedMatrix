@@ -28,15 +28,24 @@
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 
+#define PCF8591_ADDRESS 0x48 << 1
+#define MAX7219_REG_DIGIT0 0x01
+
+
+#define MAX7219_REG_NOOP        0x00  // No operation
+#define MAX7219_REG_DIGIT0      0x01  // Digits 0-7
+#define MAX7219_REG_DECODEMODE  0x09  // Decode mode (0 = no decode, 1 = BCD decode)
+#define MAX7219_REG_INTENSITY   0x0A  // Intensity (0-15)
+#define MAX7219_REG_SCANLIMIT   0x0B  // Scan limit (0-7)
+#define MAX7219_REG_SHUTDOWN    0x0C  // Shutdown (0 = shutdown, 1 = normal operation)
+#define MAX7219_REG_DISPLAYTEST 0x0F  // Display test (0 = off, 1 = on)
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
 /* USER CODE END PD */
-
-#define PCF8591_ADDRESS 0x48 << 1
-
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
@@ -67,6 +76,8 @@ ETH_HandleTypeDef heth;
 
 I2C_HandleTypeDef hi2c1;
 
+SPI_HandleTypeDef hspi1;
+
 UART_HandleTypeDef huart3;
 
 PCD_HandleTypeDef hpcd_USB_OTG_FS;
@@ -82,6 +93,7 @@ static void MX_ETH_Init(void);
 static void MX_USART3_UART_Init(void);
 static void MX_USB_OTG_FS_PCD_Init(void);
 static void MX_I2C1_Init(void);
+static void MX_SPI1_Init(void);
 /* USER CODE BEGIN PFP */
 uint8_t PCF8591_ReadAnalog(uint8_t channel);
 void SendMessage(uint8_t value, uint8_t port);
@@ -100,6 +112,21 @@ char tabela[3][30] = {
     "Douglas, 102030 \r\n",
     "Loana, 302010 \r\n",
     "Deus, 700000 \r\n",
+};
+
+const uint8_t ascii_font[59][8] = {
+	// 'A' (ASCII 65)
+	{0x18, 0x3C, 0x66, 0x7E, 0x66, 0x66, 0x66, 0x00},
+	// 'B' (ASCII 66)
+	{0x7C, 0x66, 0x66, 0x7C, 0x66, 0x66, 0x7C, 0x00},
+	// 'C' (ASCII 67)
+	{0x3C, 0x66, 0x60, 0x60, 0x60, 0x66, 0x3C, 0x00},
+	// 'D' (ASCII 68)
+	{0x78, 0x6C, 0x66, 0x66, 0x66, 0x6C, 0x78, 0x00},
+	// 'E' (ASCII 69)
+	{0x7E, 0x60, 0x60, 0x7C, 0x60, 0x60, 0x7E, 0x00},
+	// 'F' (ASCII 70)
+	{0x7E, 0x60, 0x60, 0x7C, 0x60, 0x60, 0x60, 0x00},
 };
 
 /* USER CODE END 0 */
@@ -137,14 +164,22 @@ int main(void)
   MX_USART3_UART_Init();
   MX_USB_OTG_FS_PCD_Init();
   MX_I2C1_Init();
+  MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
-  HAL_UART_Receive_IT(&huart3, rx_buffer, sizeof(rx_buffer));
+  //HAL_UART_Receive_IT(&huart3, rx_buffer, sizeof(rx_buffer));
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
+	uint8_t LDR = PCF8591_ReadAnalog(0);
+	uint8_t Temp = PCF8591_ReadAnalog(1);
+	uint8_t Pot = PCF8591_ReadAnalog(3);
+
+	DisplayCharacter('A');
 
     /* USER CODE END WHILE */
 
@@ -182,12 +217,12 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 1;
-  RCC_OscInitStruct.PLL.PLLN = 24;
+  RCC_OscInitStruct.PLL.PLLN = 19;
   RCC_OscInitStruct.PLL.PLLP = 2;
-  RCC_OscInitStruct.PLL.PLLQ = 4;
+  RCC_OscInitStruct.PLL.PLLQ = 3;
   RCC_OscInitStruct.PLL.PLLR = 2;
   RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1VCIRANGE_3;
-  RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOWIDE;
+  RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOMEDIUM;
   RCC_OscInitStruct.PLL.PLLFRACN = 0;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
@@ -311,6 +346,54 @@ static void MX_I2C1_Init(void)
 }
 
 /**
+  * @brief SPI1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_SPI1_Init(void)
+{
+
+  /* USER CODE BEGIN SPI1_Init 0 */
+
+  /* USER CODE END SPI1_Init 0 */
+
+  /* USER CODE BEGIN SPI1_Init 1 */
+
+  /* USER CODE END SPI1_Init 1 */
+  /* SPI1 parameter configuration*/
+  hspi1.Instance = SPI1;
+  hspi1.Init.Mode = SPI_MODE_MASTER;
+  hspi1.Init.Direction = SPI_DIRECTION_2LINES_TXONLY;
+  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi1.Init.NSS = SPI_NSS_SOFT;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_128;
+  hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
+  hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  hspi1.Init.CRCPolynomial = 0x0;
+  hspi1.Init.NSSPMode = SPI_NSS_PULSE_ENABLE;
+  hspi1.Init.NSSPolarity = SPI_NSS_POLARITY_LOW;
+  hspi1.Init.FifoThreshold = SPI_FIFO_THRESHOLD_01DATA;
+  hspi1.Init.TxCRCInitializationPattern = SPI_CRC_INITIALIZATION_ALL_ZERO_PATTERN;
+  hspi1.Init.RxCRCInitializationPattern = SPI_CRC_INITIALIZATION_ALL_ZERO_PATTERN;
+  hspi1.Init.MasterSSIdleness = SPI_MASTER_SS_IDLENESS_00CYCLE;
+  hspi1.Init.MasterInterDataIdleness = SPI_MASTER_INTERDATA_IDLENESS_00CYCLE;
+  hspi1.Init.MasterReceiverAutoSusp = SPI_MASTER_RX_AUTOSUSP_DISABLE;
+  hspi1.Init.MasterKeepIOState = SPI_MASTER_KEEP_IO_STATE_DISABLE;
+  hspi1.Init.IOSwap = SPI_IO_SWAP_DISABLE;
+  if (HAL_SPI_Init(&hspi1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN SPI1_Init 2 */
+
+  /* USER CODE END SPI1_Init 2 */
+
+}
+
+/**
   * @brief USART3 Initialization Function
   * @param None
   * @retval None
@@ -415,6 +498,9 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOE_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, LD1_Pin|LD3_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
@@ -428,6 +514,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PA6 */
+  GPIO_InitStruct.Pin = GPIO_PIN_6;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : LD1_Pin LD3_Pin */
   GPIO_InitStruct.Pin = LD1_Pin|LD3_Pin;
@@ -476,31 +569,12 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	/*
-	if (strncmp(rx_buffer, "Sends", 5) == 0) {
-	  execute_flag = '1';
-	}
-	if (strncmp(rx_buffer, "Clear", 5) == 0) {
-	  execute_flag = '2';
-	}
-	if (strncmp(rx_buffer, "Table", 5) == 0) {
-	  execute_flag = '3';
-	}
-	if (strncmp(rx_buffer, "Led_R", 5) == 0) {
-	  execute_flag = '4';
-	}
-	if (strncmp(rx_buffer, "Led_G", 5) == 0) {
-	  execute_flag = '5';
-	}
-	if (strncmp(rx_buffer, "Led_B", 5) == 0) {
-	  execute_flag = '6';
-	}
-	*/
-
 	if (strncmp(rx_buffer, "Read_AIN0", 9) == 0)
 	{
 		uint8_t Anal = 0;
 		uint8_t LDR = PCF8591_ReadAnalog(Anal);
+
+		DisplayCharacter('A');
 
 		SendMessage(LDR, Anal);
 	}
@@ -521,6 +595,39 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 		SendMessage(Pot, Anal);
 	}
 
+
+	// Leitura da Matrix de led:
+
+	if (strncmp(rx_buffer, "Temp", 4) == 0)
+	{
+		uint8_t Anal = 0;
+		uint8_t Temp = PCF8591_ReadAnalog(Anal);
+
+		DisplayCharacter('A');
+
+		SendMessage(Temp, Anal);
+	}
+
+	if (strncmp(rx_buffer, "Volt", 4) == 0)
+	{
+		uint8_t Anal = 1;
+		uint8_t Volt = PCF8591_ReadAnalog(Anal);
+
+		DisplayCharacter('b');
+
+		SendMessage(Volt, Anal);
+	}
+
+	if (strncmp(rx_buffer, "LDR", 4) == 0)
+	{
+		uint8_t Anal = 3;
+		uint8_t LDR = PCF8591_ReadAnalog(Anal);
+
+		DisplayCharacter('c');
+
+		SendMessage(LDR, Anal);
+	}
+
 	HAL_UART_Receive_IT(&huart3, rx_buffer, sizeof(rx_buffer));
 }
 
@@ -531,8 +638,27 @@ void SendMessage(uint8_t value, uint8_t port)
 
 	sprintf(message, "AIN%d: %d\r\n", port, value);
 
-	HAL_UART_Transmit(&huart3, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
+	HAL_UART_Transmit_IT(&huart3, (uint8_t*)message, strlen(message));
 }
+
+
+void MAX7219_SendData(uint8_t reg, uint8_t data)
+{
+	uint8_t txData[2] = {reg, data};
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, GPIO_PIN_RESET); // Pull CS low
+	HAL_SPI_Transmit(&hspi1, txData, 2, HAL_MAX_DELAY); // Transmit register and data
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, GPIO_PIN_SET); // Pull CS high
+}
+
+
+void DisplayCharacter(uint8_t character) {
+	uint8_t charIndex = 0; // ASCII offset
+
+	for (int i = 0; i < 8; i++) {
+		MAX7219_SendData(MAX7219_REG_DIGIT0 + i, ascii_font[charIndex][i]);
+	}
+}
+
 
 uint8_t PCF8591_ReadAnalog(uint8_t channel)
 {
