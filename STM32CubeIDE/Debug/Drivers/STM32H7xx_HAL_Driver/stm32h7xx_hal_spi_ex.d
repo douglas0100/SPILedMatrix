@@ -1,6 +1,5 @@
-Application/User/Core/stm32h7xx_hal_msp.o: \
- C:/Users/dougl/Downloads/FirstUartProject/FirstUart/Core/Src/stm32h7xx_hal_msp.c \
- ../../Core/Inc/main.h \
+Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_spi_ex.o: \
+ C:/Users/dougl/Downloads/FirstUartProject/FirstUart/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_spi_ex.c \
  ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h \
  ../../Core/Inc/stm32h7xx_hal_conf.h \
  ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rcc.h \
@@ -38,7 +37,6 @@ Application/User/Core/stm32h7xx_hal_msp.o: \
  ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_pcd.h \
  ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_usb.h \
  ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_pcd_ex.h
-../../Core/Inc/main.h:
 ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h:
 ../../Core/Inc/stm32h7xx_hal_conf.h:
 ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rcc.h:
