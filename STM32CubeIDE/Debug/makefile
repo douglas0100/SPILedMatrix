@@ -61,8 +61,8 @@ all: main-build
 main-build: FirstUart.elf secondary-outputs
 
 # Tool invocations
-FirstUart.elf FirstUart.map: $(OBJS) $(USER_OBJS) C:\Users\dougl\Downloads\FirstUartProject\FirstUart\STM32CubeIDE\STM32H753ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "FirstUart.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"C:\Users\dougl\Downloads\FirstUartProject\FirstUart\STM32CubeIDE\STM32H753ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="FirstUart.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+FirstUart.elf FirstUart.map: $(OBJS) $(USER_OBJS) C:\Users\dougl\Downloads\SPI\SPILedMatrix\STM32CubeIDE\STM32H753ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "FirstUart.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"C:\Users\dougl\Downloads\SPI\SPILedMatrix\STM32CubeIDE\STM32H753ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="FirstUart.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

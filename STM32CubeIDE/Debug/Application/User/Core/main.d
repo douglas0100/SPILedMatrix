@@ -1,5 +1,5 @@
 Application/User/Core/main.o: \
- C:/Users/dougl/Downloads/FirstUartProject/FirstUart/Core/Src/main.c \
+ C:/Users/dougl/Downloads/SPI/SPILedMatrix/Core/Src/main.c \
  ../../Core/Inc/main.h \
  ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h \
  ../../Core/Inc/stm32h7xx_hal_conf.h \

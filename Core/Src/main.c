@@ -29,16 +29,27 @@
 /* USER CODE BEGIN PTD */
 
 #define PCF8591_ADDRESS 0x48 << 1
-#define MAX7219_REG_DIGIT0 0x01
-
 
 #define MAX7219_REG_NOOP        0x00  // No operation
-#define MAX7219_REG_DIGIT0      0x01  // Digits 0-7
+#define MAX7219_REG_DIGIT0      0x01
 #define MAX7219_REG_DECODEMODE  0x09  // Decode mode (0 = no decode, 1 = BCD decode)
 #define MAX7219_REG_INTENSITY   0x0A  // Intensity (0-15)
 #define MAX7219_REG_SCANLIMIT   0x0B  // Scan limit (0-7)
 #define MAX7219_REG_SHUTDOWN    0x0C  // Shutdown (0 = shutdown, 1 = normal operation)
 #define MAX7219_REG_DISPLAYTEST 0x0F  // Display test (0 = off, 1 = on)
+
+/*
+#define MAX7219_REG_DIGIT1      0x02
+#define MAX7219_REG_DIGIT2      0x03
+#define MAX7219_REG_DIGIT3      0x04
+#define MAX7219_REG_DIGIT4      0x05
+#define MAX7219_REG_DIGIT5      0x06
+#define MAX7219_REG_DIGIT6      0x07
+#define MAX7219_REG_DIGIT7      0x08
+*/
+
+
+
 
 /* USER CODE END PTD */
 
@@ -115,18 +126,62 @@ char tabela[3][30] = {
 };
 
 const uint8_t ascii_font[59][8] = {
-	// 'A' (ASCII 65)
-	{0x18, 0x3C, 0x66, 0x7E, 0x66, 0x66, 0x66, 0x00},
-	// 'B' (ASCII 66)
-	{0x7C, 0x66, 0x66, 0x7C, 0x66, 0x66, 0x7C, 0x00},
-	// 'C' (ASCII 67)
-	{0x3C, 0x66, 0x60, 0x60, 0x60, 0x66, 0x3C, 0x00},
-	// 'D' (ASCII 68)
-	{0x78, 0x6C, 0x66, 0x66, 0x66, 0x6C, 0x78, 0x00},
-	// 'E' (ASCII 69)
-	{0x7E, 0x60, 0x60, 0x7C, 0x60, 0x60, 0x7E, 0x00},
-	// 'F' (ASCII 70)
-	{0x7E, 0x60, 0x60, 0x7C, 0x60, 0x60, 0x60, 0x00},
+    // 'A' (ASCII 65)
+    {0x18, 0x3C, 0x66, 0x7E, 0x66, 0x66, 0x66, 0x00},
+    // 'B' (ASCII 66)
+    {0x7C, 0x66, 0x66, 0x7C, 0x66, 0x66, 0x7C, 0x00},
+    // 'C' (ASCII 67)
+    {0x3C, 0x66, 0x60, 0x60, 0x60, 0x66, 0x3C, 0x00},
+    // 'D' (ASCII 68)
+    {0x78, 0x6C, 0x66, 0x66, 0x66, 0x6C, 0x78, 0x00},
+    // 'E' (ASCII 69)
+    {0x7E, 0x60, 0x60, 0x7C, 0x60, 0x60, 0x7E, 0x00},
+    // 'F' (ASCII 70)
+    {0x7E, 0x60, 0x60, 0x7C, 0x60, 0x60, 0x60, 0x00},
+    // 'G' (ASCII 71)
+    {0x3C, 0x66, 0x60, 0x6E, 0x66, 0x66, 0x3E, 0x00},
+    // 'H' (ASCII 72)
+    {0x66, 0x66, 0x66, 0x7E, 0x66, 0x66, 0x66, 0x00},
+    // 'I' (ASCII 73)
+    {0x3C, 0x18, 0x18, 0x18, 0x18, 0x18, 0x3C, 0x00},
+    // 'J' (ASCII 74)
+    {0x1E, 0x0C, 0x0C, 0x0C, 0x0C, 0x6C, 0x38, 0x00},
+    // 'K' (ASCII 75)
+    {0x66, 0x6C, 0x78, 0x70, 0x78, 0x6C, 0x66, 0x00},
+    // 'L' (ASCII 76)
+    {0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x7E, 0x00},
+    // 'M' (ASCII 77)
+    {0x66, 0x7E, 0x7E, 0x6E, 0x66, 0x66, 0x66, 0x00},
+    // 'N' (ASCII 78)
+    {0x66, 0x76, 0x7E, 0x7E, 0x6E, 0x66, 0x66, 0x00},
+    // 'O' (ASCII 79)
+    {0x3C, 0x66, 0x66, 0x66, 0x66, 0x66, 0x3C, 0x00},
+    // 'P' (ASCII 80)
+    {0x7C, 0x66, 0x66, 0x7C, 0x60, 0x60, 0x60, 0x00},
+    // 'Q' (ASCII 81)
+    {0x3C, 0x66, 0x66, 0x66, 0x66, 0x6C, 0x36, 0x00},
+    // 'R' (ASCII 82)
+    {0x7C, 0x66, 0x66, 0x7C, 0x78, 0x6C, 0x66, 0x00},
+    // 'S' (ASCII 83)
+    {0x3E, 0x60, 0x60, 0x3C, 0x06, 0x06, 0x7C, 0x00},
+    // 'T' (ASCII 84)
+    {0x7E, 0x18, 0x18, 0x18, 0x18, 0x18, 0x18, 0x00},
+    // 'U' (ASCII 85)
+    {0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x3C, 0x00},
+    // 'V' (ASCII 86)
+    {0x66, 0x66, 0x66, 0x66, 0x66, 0x3C, 0x18, 0x00},
+    // 'W' (ASCII 87)
+    {0x66, 0x66, 0x66, 0x6E, 0x7E, 0x7E, 0x66, 0x00},
+    // 'X' (ASCII 88)
+    {0x66, 0x66, 0x3C, 0x18, 0x3C, 0x66, 0x66, 0x00},
+    // 'Y' (ASCII 89)
+    {0x66, 0x66, 0x66, 0x3C, 0x18, 0x18, 0x18, 0x00},
+    // 'Z' (ASCII 90)
+    {0x7E, 0x06, 0x0C, 0x18, 0x30, 0x60, 0x7E, 0x00},
+	// '+' (ASCII 43)
+	{0x18, 0x18, 0x18, 0x7E, 0x18, 0x18, 0x18, 0x00},
+	// '-' (ASCII 45)
+	{0x00, 0x00, 0x00, 0x7E, 0x00, 0x00, 0x00, 0x00},
 };
 
 /* USER CODE END 0 */
@@ -165,8 +220,11 @@ int main(void)
   MX_USB_OTG_FS_PCD_Init();
   MX_I2C1_Init();
   MX_SPI1_Init();
+  MAX7219_Init();
+
+
   /* USER CODE BEGIN 2 */
-  //HAL_UART_Receive_IT(&huart3, rx_buffer, sizeof(rx_buffer));
+  HAL_UART_Receive_IT(&huart3, rx_buffer, sizeof(rx_buffer));
 
   /* USER CODE END 2 */
 
@@ -175,11 +233,6 @@ int main(void)
   while (1)
   {
 
-	uint8_t LDR = PCF8591_ReadAnalog(0);
-	uint8_t Temp = PCF8591_ReadAnalog(1);
-	uint8_t Pot = PCF8591_ReadAnalog(3);
-
-	DisplayCharacter('A');
 
 
 
@@ -573,61 +626,65 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	if (strncmp(rx_buffer, "Read_AIN0", 9) == 0)
 	{
-		uint8_t Anal = 0;
-		uint8_t LDR = PCF8591_ReadAnalog(Anal);
+		uint8_t Analogic = 0;
+		uint8_t LDR = PCF8591_ReadAnalog(Analogic);
 
 		DisplayCharacter('A');
 
-		SendMessage(LDR, Anal);
+		SendMessage(LDR, Analogic);
 	}
 
 	if (strncmp(rx_buffer, "Read_AIN1", 9) == 0)
 	{
-		uint8_t Anal = 1;
-		uint8_t Temp = PCF8591_ReadAnalog(Anal);
+		uint8_t Analogic = 1;
+		uint8_t Temp = PCF8591_ReadAnalog(Analogic);
 
-		SendMessage(Temp, Anal);
+		DisplayCharacter('B');
+
+		SendMessage(Temp, Analogic);
 	}
 
 	if (strncmp(rx_buffer, "Read_AIN3", 9) == 0)
 	{
-		uint8_t Anal = 3;
-		uint8_t Pot = PCF8591_ReadAnalog(Anal);
+		uint8_t Analogic = 3;
+		uint8_t Volt = PCF8591_ReadAnalog(Analogic);
 
-		SendMessage(Pot, Anal);
+		DisplayCharacter('C');
+
+		SendMessage(Volt, Analogic);
 	}
 
 
 	// Leitura da Matrix de led:
 
+	if (strncmp(rx_buffer, "LDR", 4) == 0)
+	{
+		uint8_t Analogic = 0;
+		uint8_t LDR = PCF8591_ReadAnalog(Analogic);
+
+		DisplayCharacter('L');
+
+		SendMessage(LDR, Analogic);
+	}
+
 	if (strncmp(rx_buffer, "Temp", 4) == 0)
 	{
-		uint8_t Anal = 0;
-		uint8_t Temp = PCF8591_ReadAnalog(Anal);
+		uint8_t Analogic = 1;
+		uint8_t Temp = PCF8591_ReadAnalog(Analogic);
 
-		DisplayCharacter('A');
+		DisplayCharacter('T');
 
-		SendMessage(Temp, Anal);
+		SendMessage(Temp, Analogic);
 	}
 
 	if (strncmp(rx_buffer, "Volt", 4) == 0)
 	{
-		uint8_t Anal = 1;
-		uint8_t Volt = PCF8591_ReadAnalog(Anal);
+		uint8_t Analogic = 3;
+		uint8_t Volt = PCF8591_ReadAnalog(Analogic);
 
-		DisplayCharacter('b');
+		DisplayCharacter('V');
 
-		SendMessage(Volt, Anal);
-	}
-
-	if (strncmp(rx_buffer, "LDR", 4) == 0)
-	{
-		uint8_t Anal = 3;
-		uint8_t LDR = PCF8591_ReadAnalog(Anal);
-
-		DisplayCharacter('c');
-
-		SendMessage(LDR, Anal);
+		SendMessage(Volt, Analogic);
 	}
 
 	HAL_UART_Receive_IT(&huart3, rx_buffer, sizeof(rx_buffer));
@@ -654,7 +711,7 @@ void MAX7219_SendData(uint8_t reg, uint8_t data)
 
 
 void DisplayCharacter(uint8_t character) {
-	uint8_t charIndex = 0; // ASCII offset
+	uint8_t charIndex = character - 65; // ASCII offset
 
 	for (int i = 0; i < 8; i++) {
 		MAX7219_SendData(MAX7219_REG_DIGIT0 + i, ascii_font[charIndex][i]);
@@ -676,6 +733,40 @@ uint8_t PCF8591_ReadAnalog(uint8_t channel)
 	// Return the second byte which contains the valid ADC reading
 	return analog_data[1];
 }
+
+void MAX7219_Init(void) {
+    // Desativar modo de teste
+    MAX7219_SendData(MAX7219_REG_DISPLAYTEST, 0x00);
+    // Configurar para modo de exibição normal
+    MAX7219_SendData(MAX7219_REG_SHUTDOWN, 0x01);
+    // Configurar decodificação para 0 (modo gráfico)
+    MAX7219_SendData(MAX7219_REG_DECODEMODE, 0x00);
+    // Configurar brilho (0x00 a 0x0F, 0x0F é o mais brilhante)
+    MAX7219_SendData(MAX7219_REG_INTENSITY, 0x08);
+    // Configurar limite de escaneamento (todas as 8 linhas ativas)
+    MAX7219_SendData(MAX7219_REG_SCANLIMIT, 0x07);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* USER CODE END 4 */
 
