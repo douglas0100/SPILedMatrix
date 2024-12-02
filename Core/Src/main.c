@@ -105,6 +105,10 @@ static void MX_USART3_UART_Init(void);
 static void MX_USB_OTG_FS_PCD_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_SPI1_Init(void);
+void MAX7219_Init(void);
+void MAX7219_Init(void);
+
+
 /* USER CODE BEGIN PFP */
 uint8_t PCF8591_ReadAnalog(uint8_t channel);
 void SendMessage(uint8_t value, uint8_t port);
@@ -116,8 +120,11 @@ void SendMessage(uint8_t value, uint8_t port);
 int counter = 0;
 int ledStatus = 0;
 
-char rx_buffer[9];
+char rx_buffer[8];
 char execute_flag = '0';
+
+char displayChar = ' ';
+int analogicValue = 0;
 
 char tabela[3][30] = {
     "Douglas, 102030 \r\n",
@@ -178,11 +185,16 @@ const uint8_t ascii_font[59][8] = {
     {0x66, 0x66, 0x66, 0x3C, 0x18, 0x18, 0x18, 0x00},
     // 'Z' (ASCII 90)
     {0x7E, 0x06, 0x0C, 0x18, 0x30, 0x60, 0x7E, 0x00},
-	// '+' (ASCII 43)
-	{0x18, 0x18, 0x18, 0x7E, 0x18, 0x18, 0x18, 0x00},
+};
+
+
+const uint8_t ascii_especial_font[2][8] = {
 	// '-' (ASCII 45)
 	{0x00, 0x00, 0x00, 0x7E, 0x00, 0x00, 0x00, 0x00},
+	// '+' (ASCII 43)
+	{0x18, 0x18, 0x18, 0x7E, 0x18, 0x18, 0x18, 0x00},
 };
+
 
 /* USER CODE END 0 */
 
@@ -232,9 +244,24 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-
-
-
+	if(displayChar == 'L')
+	{
+		uint8_t Analogic = 0;
+		uint8_t LDR = PCF8591_ReadAnalog(Analogic);
+		DisplaySync(displayChar, LDR);
+	}
+	if(displayChar == 'T')
+	{
+		uint8_t Analogic = 1;
+		uint8_t Temp = PCF8591_ReadAnalog(Analogic);
+		DisplaySync(displayChar, Temp);
+	}
+	if(displayChar == 'V')
+	{
+		uint8_t Analogic = 3;
+		uint8_t Volt = PCF8591_ReadAnalog(Analogic);
+		DisplaySync(displayChar, Volt);
+	}
 
     /* USER CODE END WHILE */
 
@@ -279,6 +306,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1VCIRANGE_3;
   RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOMEDIUM;
   RCC_OscInitStruct.PLL.PLLFRACN = 0;
+
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -438,6 +466,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.MasterReceiverAutoSusp = SPI_MASTER_RX_AUTOSUSP_DISABLE;
   hspi1.Init.MasterKeepIOState = SPI_MASTER_KEEP_IO_STATE_DISABLE;
   hspi1.Init.IOSwap = SPI_IO_SWAP_DISABLE;
+
   if (HAL_SPI_Init(&hspi1) != HAL_OK)
   {
     Error_Handler();
@@ -474,6 +503,7 @@ static void MX_USART3_UART_Init(void)
   huart3.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
   huart3.Init.ClockPrescaler = UART_PRESCALER_DIV1;
   huart3.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+
   if (HAL_UART_Init(&huart3) != HAL_OK)
   {
     Error_Handler();
@@ -624,72 +654,49 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	if (strncmp(rx_buffer, "Read_AIN0", 9) == 0)
+	if (strncmp(rx_buffer, "Read_AN0", 8) == 0)
 	{
 		uint8_t Analogic = 0;
 		uint8_t LDR = PCF8591_ReadAnalog(Analogic);
 
-		DisplayCharacter('A');
-
 		SendMessage(LDR, Analogic);
 	}
 
-	if (strncmp(rx_buffer, "Read_AIN1", 9) == 0)
+	if (strncmp(rx_buffer, "Read_AN1", 8) == 0)
 	{
 		uint8_t Analogic = 1;
 		uint8_t Temp = PCF8591_ReadAnalog(Analogic);
 
-		DisplayCharacter('B');
-
 		SendMessage(Temp, Analogic);
 	}
 
-	if (strncmp(rx_buffer, "Read_AIN3", 9) == 0)
+	if (strncmp(rx_buffer, "Read_AN3", 8) == 0)
 	{
 		uint8_t Analogic = 3;
 		uint8_t Volt = PCF8591_ReadAnalog(Analogic);
 
-		DisplayCharacter('C');
-
 		SendMessage(Volt, Analogic);
 	}
 
+	// LED MATRIX UART SELECTION
 
-	// Leitura da Matrix de led:
-
-	if (strncmp(rx_buffer, "LDR", 4) == 0)
+	if (strncmp(rx_buffer, "Read_LDR", 8) == 0)
 	{
-		uint8_t Analogic = 0;
-		uint8_t LDR = PCF8591_ReadAnalog(Analogic);
-
-		DisplayCharacter('L');
-
-		SendMessage(LDR, Analogic);
+		displayChar = 'L';
 	}
 
-	if (strncmp(rx_buffer, "Temp", 4) == 0)
+	if (strncmp(rx_buffer, "Read_Tem", 8) == 0)
 	{
-		uint8_t Analogic = 1;
-		uint8_t Temp = PCF8591_ReadAnalog(Analogic);
-
-		DisplayCharacter('T');
-
-		SendMessage(Temp, Analogic);
+		displayChar = 'T';
 	}
 
-	if (strncmp(rx_buffer, "Volt", 4) == 0)
+	if (strncmp(rx_buffer, "Read_Vol", 8) == 0)
 	{
-		uint8_t Analogic = 3;
-		uint8_t Volt = PCF8591_ReadAnalog(Analogic);
-
-		DisplayCharacter('V');
-
-		SendMessage(Volt, Analogic);
+		displayChar = 'V';
 	}
 
 	HAL_UART_Receive_IT(&huart3, rx_buffer, sizeof(rx_buffer));
 }
-
 
 void SendMessage(uint8_t value, uint8_t port)
 {
@@ -700,7 +707,6 @@ void SendMessage(uint8_t value, uint8_t port)
 	HAL_UART_Transmit_IT(&huart3, (uint8_t*)message, strlen(message));
 }
 
-
 void MAX7219_SendData(uint8_t reg, uint8_t data)
 {
 	uint8_t txData[2] = {reg, data};
@@ -710,7 +716,8 @@ void MAX7219_SendData(uint8_t reg, uint8_t data)
 }
 
 
-void DisplayCharacter(uint8_t character) {
+void DisplayCharacter(uint8_t character)
+{
 	uint8_t charIndex = character - 65; // ASCII offset
 
 	for (int i = 0; i < 8; i++) {
@@ -718,6 +725,32 @@ void DisplayCharacter(uint8_t character) {
 	}
 }
 
+void DisplayEspecialCharacter(uint8_t character)
+{
+	uint8_t charIndex = character; // ASCII offset
+
+	for (int i = 0; i < 8; i++) {
+		MAX7219_SendData(MAX7219_REG_DIGIT0 + i, ascii_especial_font[charIndex][i]);
+	}
+}
+
+void DisplaySync(char displayChar, uint8_t value)
+{
+	if(value < 128)
+	{
+		DisplayCharacter(displayChar);
+		HAL_Delay(500);
+		DisplayEspecialCharacter(0);
+		HAL_Delay(500);
+	}
+	else
+	{
+		DisplayCharacter(displayChar);
+		HAL_Delay(500);
+		DisplayEspecialCharacter(1);
+		HAL_Delay(500);
+	}
+}
 
 uint8_t PCF8591_ReadAnalog(uint8_t channel)
 {
@@ -746,27 +779,6 @@ void MAX7219_Init(void) {
     // Configurar limite de escaneamento (todas as 8 linhas ativas)
     MAX7219_SendData(MAX7219_REG_SCANLIMIT, 0x07);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /* USER CODE END 4 */
 
