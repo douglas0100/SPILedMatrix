@@ -172,7 +172,7 @@ const uint8_t ascii_font[59][8] = {
     // 'S' (ASCII 83)
     {0x3E, 0x60, 0x60, 0x3C, 0x06, 0x06, 0x7C, 0x00},
     // 'T' (ASCII 84)
-    {0x7E, 0x18, 0x18, 0x18, 0x18, 0x18, 0x18, 0x00},
+    {0x7E, 0x7E, 0x18, 0x18, 0x18, 0x18, 0x18, 0x00},
     // 'U' (ASCII 85)
     {0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x3C, 0x00},
     // 'V' (ASCII 86)
@@ -187,6 +187,20 @@ const uint8_t ascii_font[59][8] = {
     {0x7E, 0x06, 0x0C, 0x18, 0x30, 0x60, 0x7E, 0x00},
 };
 
+/*
+ * Each hex value in the array 'A' is a matrix led column.
+ * Binary conversion to the array 'A':
+ *
+ *  0x18 = 00011000
+ *	0x3C = 00111100
+ *	0x66 = 01100110
+ * 	0x7E = 01111110
+ *	0x66 = 01100110
+ *	0x66 = 01100110
+ *	0x66 = 01100110
+ *	0x00 = 00000000
+ *
+ */
 
 const uint8_t ascii_especial_font[2][8] = {
 	// '-' (ASCII 45)
@@ -395,6 +409,7 @@ static void MX_I2C1_Init(void)
   /* USER CODE BEGIN I2C1_Init 1 */
 
   /* USER CODE END I2C1_Init 1 */
+
   hi2c1.Instance = I2C1;
   hi2c1.Init.Timing = 0x10707DBC;
   hi2c1.Init.OwnAddress1 = 0;
